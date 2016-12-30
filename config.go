@@ -9,9 +9,6 @@ package smolder
 
 // APIConfig contains all parameters required to set up a new smolder API
 type APIConfig struct {
-	BaseURL         string
-	PathPrefix      string
-	SwaggerAPIPath  string
-	SwaggerPath     string
-	SwaggerFilePath string
+	BaseURL    string
+	PathPrefix string
 }

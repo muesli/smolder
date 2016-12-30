@@ -13,7 +13,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/emicklei/go-restful"
-	"github.com/emicklei/go-restful/swagger"
 )
 
 const (
@@ -95,17 +94,6 @@ func NewSmolderContainer(config APIConfig, _shutdownGracefully *bool, _requestIn
 	wsContainer.Filter(optionsFilter)
 	wsContainer.Filter(corsFilter)
 	wsContainer.Filter(wsContainer.OPTIONSFilter)
-
-	if config.SwaggerFilePath != "" {
-		wsConfig := swagger.Config{
-			WebServices:     wsContainer.RegisteredWebServices(),
-			WebServicesUrl:  config.BaseURL,
-			ApiPath:         config.SwaggerAPIPath,
-			SwaggerPath:     config.SwaggerPath,
-			SwaggerFilePath: config.SwaggerFilePath,
-		}
-		swagger.RegisterSwaggerService(wsConfig, wsContainer)
-	}
 
 	return wsContainer
 }
