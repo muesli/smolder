@@ -17,7 +17,7 @@ var (
 // Register this resource with the container to setup all the routes
 func (r *HelloResource) Register(container *restful.Container, config smolder.APIConfig, context smolder.APIContextFactory) {
 	r.Name = "HelloResource"
-	r.TypeName = "hello"
+	r.TypeName = "reply"
 	r.Endpoint = "hello"
 	r.Doc = "Our very own API endpoint"
 
