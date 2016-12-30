@@ -35,39 +35,45 @@ type Resource struct {
 // GetIDSupported is the interface Resources need to fulfill to respond to GET-by-ID requests
 type GetIDSupported interface {
 	GetByIDs(context APIContext, request *restful.Request, response *restful.Response, ids []string)
+	GetByIDsAuthRequired() bool
 }
 
 // GetSupported is the interface Resources need to fulfill to respond to generic GET requests
 type GetSupported interface {
 	Get(context APIContext, request *restful.Request, response *restful.Response, params map[string][]string)
+	GetAuthRequired() bool
 	GetDoc() string
 	GetParams() []*restful.Parameter
 }
 
 // PostSupported is the interface Resources need to fulfill to respond to generic POST requests
 type PostSupported interface {
-	Post(context APIContext, request *restful.Request, response *restful.Response, auth interface{})
+	Post(context APIContext, request *restful.Request, response *restful.Response)
+	PostAuthRequired() bool
 	PostDoc() string
 	PostParams() []*restful.Parameter
 }
 
 // PutSupported is the interface Resources need to fulfill to respond to generic PUT requests
 type PutSupported interface {
-	Put(context APIContext, request *restful.Request, response *restful.Response, auth interface{})
+	Put(context APIContext, request *restful.Request, response *restful.Response)
+	PutAuthRequired() bool
 	PutDoc() string
 	PutParams() []*restful.Parameter
 }
 
 // PatchSupported is the interface Resources need to fulfill to respond to generic PATCH requests
 type PatchSupported interface {
-	Patch(context APIContext, request *restful.Request, response *restful.Response, auth interface{})
+	Patch(context APIContext, request *restful.Request, response *restful.Response)
+	PatchAuthRequired() bool
 	PatchDoc() string
 	PatchParams() []*restful.Parameter
 }
 
 // DeleteSupported is the interface Resources need to fulfill to respond to generic DELETE requests
 type DeleteSupported interface {
-	Delete(context APIContext, request *restful.Request, response *restful.Response, auth interface{})
+	Delete(context APIContext, request *restful.Request, response *restful.Response)
+	DeleteAuthRequired() bool
 	DeleteDoc() string
 	DeleteParams() []*restful.Parameter
 }
@@ -126,7 +132,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(PostSupported); ok {
-		route := ws.POST("").Filter(r.authenticate).To(r.Post).
+		route := ws.POST("").To(r.Post).
 			Doc(resource.PostDoc())
 
 		for _, p := range resource.PostParams() {
@@ -141,7 +147,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(PutSupported); ok {
-		route := ws.PUT("/{" + r.TypeName + "-id}").Filter(r.authenticate).To(r.Put).
+		route := ws.PUT("/{" + r.TypeName + "-id}").To(r.Put).
 			Doc(resource.PutDoc())
 
 		for _, p := range resource.PutParams() {
@@ -161,7 +167,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(PatchSupported); ok {
-		route := ws.PATCH("/{" + r.TypeName + "-id").Filter(r.authenticate).To(r.Patch).
+		route := ws.PATCH("/{" + r.TypeName + "-id").To(r.Patch).
 			Doc(resource.PatchDoc())
 
 		for _, p := range resource.PatchParams() {
@@ -181,7 +187,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(DeleteSupported); ok {
-		route := ws.DELETE("/{" + r.TypeName + "-id}").Filter(r.authenticate).To(r.Delete).
+		route := ws.DELETE("/{" + r.TypeName + "-id}").To(r.Delete).
 			Doc(resource.DeleteDoc())
 
 		for _, p := range resource.DeleteParams() {
@@ -206,6 +212,19 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 // Get responds to GET requests
 func (r Resource) Get(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(GetSupported); ok {
+		context := r.Context.NewAPIContext()
+		if resource.GetAuthRequired() {
+			auth, err := context.Authentication(request)
+			if err != nil || auth == nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusUnauthorized,
+					false,
+					"Invalid accesstoken",
+					"GET"))
+				return
+			}
+		}
+
 		params, err := Validate(request, resource.GetParams())
 		if err != nil {
 			ErrorResponseHandler(request, response, NewErrorResponse(
@@ -224,7 +243,6 @@ func (r Resource) Get(request *restful.Request, response *restful.Response) {
 			}
 		}
 
-		context := r.Context.NewAPIContext()
 		resource.Get(context, request, response, params)
 		request.SetAttribute("context", context)
 	}
@@ -234,17 +252,19 @@ func (r Resource) Get(request *restful.Request, response *restful.Response) {
 func (r Resource) Post(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(PostSupported); ok {
 		context := r.Context.NewAPIContext()
-		auth, err := context.Authentication(request)
-		if err != nil {
-			ErrorResponseHandler(request, response, NewErrorResponse(
-				http.StatusUnauthorized,
-				false,
-				"Invalid accesstoken",
-				"POST"))
-			return
+		if resource.PostAuthRequired() {
+			auth, err := context.Authentication(request)
+			if err != nil || auth == nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusUnauthorized,
+					false,
+					"Invalid accesstoken",
+					"POST"))
+				return
+			}
 		}
 
-		resource.Post(context, request, response, auth)
+		resource.Post(context, request, response)
 		request.SetAttribute("context", context)
 	}
 }
@@ -253,17 +273,19 @@ func (r Resource) Post(request *restful.Request, response *restful.Response) {
 func (r Resource) Put(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(PutSupported); ok {
 		context := r.Context.NewAPIContext()
-		auth, err := context.Authentication(request)
-		if err != nil {
-			ErrorResponseHandler(request, response, NewErrorResponse(
-				http.StatusUnauthorized,
-				false,
-				"Invalid accesstoken",
-				"PUT"))
-			return
+		if resource.PutAuthRequired() {
+			auth, err := context.Authentication(request)
+			if err != nil || auth == nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusUnauthorized,
+					false,
+					"Invalid accesstoken",
+					"PUT"))
+				return
+			}
 		}
 
-		resource.Put(context, request, response, auth)
+		resource.Put(context, request, response)
 		request.SetAttribute("context", context)
 	}
 }
@@ -272,17 +294,19 @@ func (r Resource) Put(request *restful.Request, response *restful.Response) {
 func (r Resource) Patch(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(PatchSupported); ok {
 		context := r.Context.NewAPIContext()
-		auth, err := context.Authentication(request)
-		if err != nil {
-			ErrorResponseHandler(request, response, NewErrorResponse(
-				http.StatusUnauthorized,
-				false,
-				"Invalid accesstoken",
-				"PATCH"))
-			return
+		if resource.PatchAuthRequired() {
+			auth, err := context.Authentication(request)
+			if err != nil || auth == nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusUnauthorized,
+					false,
+					"Invalid accesstoken",
+					"PATCH"))
+				return
+			}
 		}
 
-		resource.Patch(context, request, response, auth)
+		resource.Patch(context, request, response)
 		request.SetAttribute("context", context)
 	}
 }
@@ -291,17 +315,19 @@ func (r Resource) Patch(request *restful.Request, response *restful.Response) {
 func (r Resource) Delete(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(DeleteSupported); ok {
 		context := r.Context.NewAPIContext()
-		auth, err := context.Authentication(request)
-		if err != nil {
-			ErrorResponseHandler(request, response, NewErrorResponse(
-				http.StatusUnauthorized,
-				false,
-				"Invalid accesstoken",
-				"DELETE"))
-			return
+		if resource.DeleteAuthRequired() {
+			auth, err := context.Authentication(request)
+			if err != nil || auth == nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusUnauthorized,
+					false,
+					"Invalid accesstoken",
+					"DELETE"))
+				return
+			}
 		}
 
-		resource.Delete(context, request, response, auth)
+		resource.Delete(context, request, response)
 		request.SetAttribute("context", context)
 	}
 }
@@ -309,6 +335,19 @@ func (r Resource) Delete(request *restful.Request, response *restful.Response) {
 // GetByIDs handles GET requests which want to retrieve one or more IDs
 func (r Resource) GetByIDs(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(GetIDSupported); ok {
+		context := r.Context.NewAPIContext()
+		if resource.GetByIDsAuthRequired() {
+			auth, err := context.Authentication(request)
+			if err != nil || auth == nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusUnauthorized,
+					false,
+					"Invalid accesstoken",
+					"GET"))
+				return
+			}
+		}
+
 		ids := []string{}
 		if ql, ok := request.Request.URL.Query()["ids[]"]; ok {
 			for _, q := range ql {
@@ -331,7 +370,6 @@ func (r Resource) GetByIDs(request *restful.Request, response *restful.Response)
 			return
 		}
 
-		context := r.Context.NewAPIContext()
 		resource.GetByIDs(context, request, response, ids)
 		request.SetAttribute("context", context)
 	}
@@ -344,19 +382,4 @@ func (r Resource) NotFound(request *restful.Request, response *restful.Response)
 		false,
 		"This "+r.TypeName+" does not exist.",
 		r.TypeName))
-}
-
-func (r Resource) authenticate(request *restful.Request, response *restful.Response, chain *restful.FilterChain) {
-	context := r.Context.NewAPIContext()
-	_, err := context.Authentication(request)
-	if err != nil {
-		ErrorResponseHandler(request, response, NewErrorResponse(
-			http.StatusUnauthorized,
-			false,
-			err,
-			"authenticate"))
-		return
-	}
-
-	chain.ProcessFilter(request, response)
 }
