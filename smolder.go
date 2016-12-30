@@ -25,7 +25,7 @@ var (
 )
 
 func gracefulShutdownFilter(request *restful.Request, response *restful.Response, chain *restful.FilterChain) {
-	if *shutdownGracefully {
+	if shutdownGracefully != nil && *shutdownGracefully {
 		var resp struct {
 			Error string `json:"error"`
 		}
@@ -39,10 +39,14 @@ func gracefulShutdownFilter(request *restful.Request, response *restful.Response
 	defer func() {
 		// Make sure pendingReqeusts gets decremented even if a panic was
 		// thrown in ProcessFilter().
-		requestIncChan <- -1
+		if requestIncChan != nil {
+			requestIncChan <- -1
+		}
 	}()
 
-	requestIncChan <- 1
+	if requestIncChan != nil {
+		requestIncChan <- 1
+	}
 	chain.ProcessFilter(request, response)
 }
 
