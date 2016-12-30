@@ -2,7 +2,7 @@ package main
 
 import "github.com/muesli/smolder"
 
-// HelloResponse is the common response to 'user' requests
+// HelloResponse is the common response to 'hello' requests
 type HelloResponse struct {
 	smolder.Response
 

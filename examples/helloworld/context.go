@@ -7,11 +7,11 @@ import (
 	"github.com/muesli/smolder"
 )
 
-// Context is polly's central context
+// Context is the central API context
 type Context struct {
 }
 
-// NewAPIContext returns a new polly context
+// NewAPIContext returns a new context
 func (context *Context) NewAPIContext() smolder.APIContext {
 	return &Context{}
 }
