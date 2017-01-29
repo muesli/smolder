@@ -60,9 +60,9 @@ func NewErrorResponse(code int, internal bool, err interface{}, context string) 
 // ErrorResponseHandler is the default error response handler
 func ErrorResponseHandler(request *restful.Request, response *restful.Response, err *ErrorResponse) {
 	fields := log.Fields{
-		"Internal":     err.Err.InternalError,
-		"Description":  err.Err.Msg,
-		"Context":      err.Err.Context,
+		"Internal":     err.Err[0].InternalError,
+		"Description":  err.Err[0].Msg,
+		"Context":      err.Err[0].Context,
 		"URL":          request.Request.URL.String(),
 		"Method":       request.Request.Method,
 		"http_request": request.Request,
