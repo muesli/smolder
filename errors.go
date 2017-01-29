@@ -16,17 +16,20 @@ import (
 type APIError struct {
 	Code          int    `json:"statusCode"`
 	InternalError bool   `json:"internalerror,omitempty"`
-	Msg           string `json:"description"`
-	Context       string `json:"context,omitempty"`
+	Msg           string `json:"detail"`
+	Source        struct {
+		Pointer string `json:"pointer"`
+	} `json:"source"`
+	Context string `json:"context,omitempty"`
 }
 
 // ErrorResponse is the default error handling response
 type ErrorResponse struct {
-	Err APIError `json:"error"`
+	Err []APIError `json:"errors"`
 }
 
 func (err *ErrorResponse) Error() string {
-	return err.Err.Msg
+	return err.Err[0].Msg
 }
 
 // NewErrorResponse creates a new ErrorResponse with the provided values
@@ -43,11 +46,13 @@ func NewErrorResponse(code int, internal bool, err interface{}, context string) 
 	}
 
 	return &ErrorResponse{
-		APIError{
-			Code:          code,
-			InternalError: internal,
-			Msg:           msg,
-			Context:       context,
+		[]APIError{
+			{
+				Code:          code,
+				InternalError: internal,
+				Msg:           msg,
+				Context:       context,
+			},
 		},
 	}
 }
@@ -76,6 +81,6 @@ func ErrorResponseHandler(request *restful.Request, response *restful.Response, 
 	log.WithFields(fields).Error(err)
 
 	if response != nil {
-		response.WriteHeaderAndEntity(err.Err.Code, err)
+		response.WriteHeaderAndEntity(err.Err[0].Code, err)
 	}
 }
