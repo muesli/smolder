@@ -36,6 +36,7 @@ type Resource struct {
 type GetIDSupported interface {
 	GetByIDs(context APIContext, request *restful.Request, response *restful.Response, ids []string)
 	GetByIDsAuthRequired() bool
+	Returns() interface{}
 }
 
 // GetSupported is the interface Resources need to fulfill to respond to generic GET requests
@@ -44,6 +45,7 @@ type GetSupported interface {
 	GetAuthRequired() bool
 	GetDoc() string
 	GetParams() []*restful.Parameter
+	Returns() interface{}
 }
 
 // PostSupported is the interface Resources need to fulfill to respond to generic POST requests
@@ -52,6 +54,8 @@ type PostSupported interface {
 	PostAuthRequired() bool
 	PostDoc() string
 	PostParams() []*restful.Parameter
+	Reads() interface{}
+	Returns() interface{}
 }
 
 // PutSupported is the interface Resources need to fulfill to respond to generic PUT requests
@@ -60,6 +64,8 @@ type PutSupported interface {
 	PutAuthRequired() bool
 	PutDoc() string
 	PutParams() []*restful.Parameter
+	Reads() interface{}
+	Returns() interface{}
 }
 
 // PatchSupported is the interface Resources need to fulfill to respond to generic PATCH requests
@@ -68,6 +74,8 @@ type PatchSupported interface {
 	PatchAuthRequired() bool
 	PatchDoc() string
 	PatchParams() []*restful.Parameter
+	Reads() interface{}
+	Returns() interface{}
 }
 
 // DeleteSupported is the interface Resources need to fulfill to respond to generic DELETE requests
@@ -90,10 +98,11 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		Produces(restful.MIME_JSON)
 
 	isDatabaseItem := false
-	if _, ok := resource.(GetIDSupported); ok {
+	if resource, ok := resource.(GetIDSupported); ok {
 		isDatabaseItem = true
 		route := ws.GET("/{id}").To(r.GetByIDs).
 			Doc("get item by id").
+			Returns(http.StatusOK, "OK", resource.Returns()).
 			Param(ws.PathParameter("id", "ID of "+r.TypeName).
 				DataType("string").
 				Required(true).
@@ -106,7 +115,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	if resource, ok := resource.(GetSupported); ok {
 		isGetSupported = true
 		route := ws.GET("").To(r.Get).
-			Doc(resource.GetDoc())
+			Doc(resource.GetDoc()).
+			Returns(http.StatusOK, "OK", resource.Returns())
 
 		for _, p := range resource.GetParams() {
 			route.Param(p)
@@ -133,7 +143,9 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 
 	if resource, ok := resource.(PostSupported); ok {
 		route := ws.POST("").To(r.Post).
-			Doc(resource.PostDoc())
+			Doc(resource.PostDoc()).
+			Reads(resource.Reads()).
+			Returns(http.StatusOK, "OK", resource.Returns())
 
 		for _, p := range resource.PostParams() {
 			route.Param(p)
@@ -147,8 +159,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(PutSupported); ok {
-		route := ws.PUT("/{" + r.TypeName + "-id}").To(r.Put).
-			Doc(resource.PutDoc())
+		route := ws.PUT("/{"+r.TypeName+"-id}").To(r.Put).
+			Doc(resource.PutDoc()).
+			Reads(resource.Reads()).
+			Returns(http.StatusOK, "OK", resource.Returns())
 
 		for _, p := range resource.PutParams() {
 			route.Param(p)
@@ -167,8 +181,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(PatchSupported); ok {
-		route := ws.PATCH("/{" + r.TypeName + "-id").To(r.Patch).
-			Doc(resource.PatchDoc())
+		route := ws.PATCH("/{"+r.TypeName+"-id").To(r.Patch).
+			Doc(resource.PatchDoc()).
+			Reads(resource.Reads()).
+			Returns(http.StatusOK, "OK", resource.Returns())
 
 		for _, p := range resource.PatchParams() {
 			route.Param(p)
