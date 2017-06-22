@@ -103,6 +103,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		route := ws.GET("/{id}").To(r.GetByIDs).
 			Doc("get item by id").
 			Returns(http.StatusOK, "OK", resource.Returns()).
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
 			Param(ws.PathParameter("id", "ID of "+r.TypeName).
 				DataType("string").
 				Required(true).
@@ -116,7 +117,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		isGetSupported = true
 		route := ws.GET("").To(r.Get).
 			Doc(resource.GetDoc()).
-			Returns(http.StatusOK, "OK", resource.Returns())
+			Returns(http.StatusOK, "OK", resource.Returns()).
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
 
 		for _, p := range resource.GetParams() {
 			route.Param(p)
@@ -132,7 +134,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 
 	if isDatabaseItem && !isGetSupported {
 		route := ws.GET("").To(r.GetByIDs).
-			Doc("get " + r.TypeName + " by ids").
+			Doc("get "+r.TypeName+" by ids").
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
 			Param(ws.QueryParameter("ids[]", "IDs of "+r.TypeName+"s").
 				DataType("string").
 				Required(true).
@@ -145,7 +148,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		route := ws.POST("").To(r.Post).
 			Doc(resource.PostDoc()).
 			Reads(resource.Reads()).
-			Returns(http.StatusOK, "OK", resource.Returns())
+			Returns(http.StatusOK, "OK", resource.Returns()).
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
 
 		for _, p := range resource.PostParams() {
 			route.Param(p)
@@ -162,7 +166,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		route := ws.PUT("/{"+r.TypeName+"-id}").To(r.Put).
 			Doc(resource.PutDoc()).
 			Reads(resource.Reads()).
-			Returns(http.StatusOK, "OK", resource.Returns())
+			Returns(http.StatusOK, "OK", resource.Returns()).
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
 
 		for _, p := range resource.PutParams() {
 			route.Param(p)
@@ -184,7 +189,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		route := ws.PATCH("/{"+r.TypeName+"-id").To(r.Patch).
 			Doc(resource.PatchDoc()).
 			Reads(resource.Reads()).
-			Returns(http.StatusOK, "OK", resource.Returns())
+			Returns(http.StatusOK, "OK", resource.Returns()).
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
 
 		for _, p := range resource.PatchParams() {
 			route.Param(p)
@@ -203,8 +209,9 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(DeleteSupported); ok {
-		route := ws.DELETE("/{" + r.TypeName + "-id}").To(r.Delete).
-			Doc(resource.DeleteDoc())
+		route := ws.DELETE("/{"+r.TypeName+"-id}").To(r.Delete).
+			Doc(resource.DeleteDoc()).
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
 
 		for _, p := range resource.DeleteParams() {
 			route.Param(p)
