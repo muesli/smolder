@@ -111,6 +111,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 
 		if resource.GetByIDsAuthRequired() {
 			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+			route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
+				DataType("string").
+				Required(true).
+				AllowMultiple(false))
 		}
 
 		ws.Route(route)
@@ -126,6 +130,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 
 		if resource.GetAuthRequired() {
 			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+			route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
+				DataType("string").
+				Required(true).
+				AllowMultiple(false))
 		}
 
 		for _, p := range resource.GetParams() {
@@ -146,7 +154,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
 			Param(ws.QueryParameter("ids[]", "IDs of "+r.TypeName+"s").
 				DataType("string").
-				Required(true).
+				// Required(true).
 				AllowMultiple(true))
 
 		ws.Route(route)
@@ -161,15 +169,15 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 
 		if resource.PostAuthRequired() {
 			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+			route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
+				DataType("string").
+				Required(true).
+				AllowMultiple(false))
 		}
 
 		for _, p := range resource.PostParams() {
 			route.Param(p)
 		}
-		route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
-			DataType("string").
-			Required(true).
-			AllowMultiple(false))
 
 		ws.Route(route)
 	}
@@ -183,6 +191,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 
 		if resource.PutAuthRequired() {
 			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+			route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
+				DataType("string").
+				Required(true).
+				AllowMultiple(false))
 		}
 
 		for _, p := range resource.PutParams() {
@@ -190,11 +202,6 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		}
 
 		route.Param(restful.PathParameter(r.TypeName+"-id", "ID of a "+r.TypeName).
-			Required(true).
-			AllowMultiple(false))
-
-		route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
-			DataType("string").
 			Required(true).
 			AllowMultiple(false))
 
@@ -210,6 +217,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 
 		if resource.PatchAuthRequired() {
 			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+			route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
+				DataType("string").
+				Required(true).
+				AllowMultiple(false))
 		}
 
 		for _, p := range resource.PatchParams() {
@@ -217,11 +228,6 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		}
 
 		route.Param(restful.PathParameter(r.TypeName+"-id", "ID of a "+r.TypeName).
-			Required(true).
-			AllowMultiple(false))
-
-		route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
-			DataType("string").
 			Required(true).
 			AllowMultiple(false))
 
@@ -235,6 +241,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 
 		if resource.DeleteAuthRequired() {
 			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+			route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
+				DataType("string").
+				Required(true).
+				AllowMultiple(false))
 		}
 
 		for _, p := range resource.DeleteParams() {
@@ -242,11 +252,6 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		}
 
 		route.Param(restful.PathParameter(r.TypeName+"-id", "ID of a "+r.TypeName).
-			Required(true).
-			AllowMultiple(false))
-
-		route.Param(restful.QueryParameter("accesstoken", "accesstoken required for auth").
-			DataType("string").
 			Required(true).
 			AllowMultiple(false))
 
