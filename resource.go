@@ -165,7 +165,6 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 			Doc(resource.PostDoc()).
 			Reads(resource.Reads()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
-			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
 			Returns(http.StatusBadRequest, "Invalid post data", ErrorResponse{})
 
 		if resource.PostAuthRequired() {
