@@ -142,7 +142,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		if isDatabaseItem {
 			route.Param(ws.QueryParameter("ids[]", "IDs of "+r.TypeName+"s").
 				DataType("string").
-				Required(true).
+				// Required(true).
 				AllowMultiple(true))
 		}
 		ws.Route(route)
