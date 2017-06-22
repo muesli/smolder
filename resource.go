@@ -165,7 +165,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 			Doc(resource.PostDoc()).
 			Reads(resource.Reads()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
-			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
+			Returns(http.StatusBadRequest, "Invalid post data", ErrorResponse{})
 
 		if resource.PostAuthRequired() {
 			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
@@ -187,7 +188,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 			Doc(resource.PutDoc()).
 			Reads(resource.Reads()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
-			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
+			Returns(http.StatusBadRequest, "Invalid put data", ErrorResponse{})
 
 		if resource.PutAuthRequired() {
 			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
@@ -213,7 +215,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 			Doc(resource.PatchDoc()).
 			Reads(resource.Reads()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
-			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
+			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
+			Returns(http.StatusBadRequest, "Invalid patch data", ErrorResponse{})
 
 		if resource.PatchAuthRequired() {
 			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
