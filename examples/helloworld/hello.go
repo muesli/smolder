@@ -26,3 +26,8 @@ func (r *HelloResource) Register(container *restful.Container, config smolder.AP
 
 	r.Init(container, r)
 }
+
+// Returns returns the model that will be returned
+func (r *HelloResource) Returns() interface{} {
+	return HelloResponse{}
+}
