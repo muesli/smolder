@@ -109,6 +109,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 				Required(true).
 				AllowMultiple(false))
 
+		if resource.GetByIDsAuthRequired() {
+			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+		}
+
 		ws.Route(route)
 	}
 
@@ -119,6 +123,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 			Doc(resource.GetDoc()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
+
+		if resource.GetAuthRequired() {
+			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+		}
 
 		for _, p := range resource.GetParams() {
 			route.Param(p)
@@ -151,6 +159,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 			Returns(http.StatusOK, "OK", resource.Returns()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
 
+		if resource.PostAuthRequired() {
+			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+		}
+
 		for _, p := range resource.PostParams() {
 			route.Param(p)
 		}
@@ -168,6 +180,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 			Reads(resource.Reads()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
+
+		if resource.PutAuthRequired() {
+			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+		}
 
 		for _, p := range resource.PutParams() {
 			route.Param(p)
@@ -192,6 +208,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 			Returns(http.StatusOK, "OK", resource.Returns()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
 
+		if resource.PatchAuthRequired() {
+			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+		}
+
 		for _, p := range resource.PatchParams() {
 			route.Param(p)
 		}
@@ -212,6 +232,10 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 		route := ws.DELETE("/{"+r.TypeName+"-id}").To(r.Delete).
 			Doc(resource.DeleteDoc()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
+
+		if resource.DeleteAuthRequired() {
+			route.Returns(http.StatusUnauthorized, "Authorization required", ErrorResponse{})
+		}
 
 		for _, p := range resource.DeleteParams() {
 			route.Param(p)
