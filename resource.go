@@ -50,30 +50,33 @@ type GetSupported interface {
 
 // PostSupported is the interface Resources need to fulfill to respond to generic POST requests
 type PostSupported interface {
-	Post(context APIContext, request *restful.Request, response *restful.Response)
+	Post(context APIContext, data interface{}, request *restful.Request, response *restful.Response)
 	PostAuthRequired() bool
 	PostDoc() string
 	PostParams() []*restful.Parameter
+	Validate(context APIContext, data interface{}, request *restful.Request) error
 	Reads() interface{}
 	Returns() interface{}
 }
 
 // PutSupported is the interface Resources need to fulfill to respond to generic PUT requests
 type PutSupported interface {
-	Put(context APIContext, request *restful.Request, response *restful.Response)
+	Put(context APIContext, data interface{}, request *restful.Request, response *restful.Response)
 	PutAuthRequired() bool
 	PutDoc() string
 	PutParams() []*restful.Parameter
+	Validate(context APIContext, data interface{}, request *restful.Request) error
 	Reads() interface{}
 	Returns() interface{}
 }
 
 // PatchSupported is the interface Resources need to fulfill to respond to generic PATCH requests
 type PatchSupported interface {
-	Patch(context APIContext, request *restful.Request, response *restful.Response)
+	Patch(context APIContext, data interface{}, request *restful.Request, response *restful.Response)
 	PatchAuthRequired() bool
 	PatchDoc() string
 	PatchParams() []*restful.Parameter
+	Validate(context APIContext, data interface{}, request *restful.Request) error
 	Reads() interface{}
 	Returns() interface{}
 }
@@ -318,7 +321,30 @@ func (r Resource) Post(request *restful.Request, response *restful.Response) {
 			}
 		}
 
-		resource.Post(context, request, response)
+		ps := resource.Reads()
+		if ps != nil {
+			err := request.ReadEntity(&ps)
+			if err != nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusBadRequest,
+					false,
+					"Can't parse request data",
+					"POST Data Validation"))
+				return
+			}
+
+			err = resource.Validate(context, ps, request)
+			if err != nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusBadRequest,
+					false,
+					err,
+					"POST Data Validation"))
+				return
+			}
+		}
+
+		resource.Post(context, ps, request, response)
 		request.SetAttribute("context", context)
 	}
 }
@@ -339,7 +365,30 @@ func (r Resource) Put(request *restful.Request, response *restful.Response) {
 			}
 		}
 
-		resource.Put(context, request, response)
+		ps := resource.Reads()
+		if ps != nil {
+			err := request.ReadEntity(&ps)
+			if err != nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusBadRequest,
+					false,
+					"Can't parse request data",
+					"PUT Data Validation"))
+				return
+			}
+
+			err = resource.Validate(context, ps, request)
+			if err != nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusBadRequest,
+					false,
+					err,
+					"PUT Data Validation"))
+				return
+			}
+		}
+
+		resource.Put(context, ps, request, response)
 		request.SetAttribute("context", context)
 	}
 }
@@ -360,7 +409,30 @@ func (r Resource) Patch(request *restful.Request, response *restful.Response) {
 			}
 		}
 
-		resource.Patch(context, request, response)
+		ps := resource.Reads()
+		if ps != nil {
+			err := request.ReadEntity(&ps)
+			if err != nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusBadRequest,
+					false,
+					"Can't parse request data",
+					"PATCH Data Validation"))
+				return
+			}
+
+			err = resource.Validate(context, ps, request)
+			if err != nil {
+				ErrorResponseHandler(request, response, NewErrorResponse(
+					http.StatusBadRequest,
+					false,
+					err,
+					"PATCH Data Validation"))
+				return
+			}
+		}
+
+		resource.Patch(context, ps, request, response)
 		request.SetAttribute("context", context)
 	}
 }
