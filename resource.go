@@ -9,6 +9,7 @@ package smolder
 
 import (
 	"net/http"
+	"reflect"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/emicklei/go-restful"
@@ -166,7 +167,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	if resource, ok := resource.(PostSupported); ok {
 		route := ws.POST("").To(r.Post).
 			Doc(resource.PostDoc()).
-			Reads(resource.Reads()).
+			Reads(reflect.Indirect(reflect.ValueOf(resource.Reads())).Interface()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
 			Returns(http.StatusBadRequest, "Invalid post data", ErrorResponse{})
 
@@ -188,7 +189,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	if resource, ok := resource.(PutSupported); ok {
 		route := ws.PUT("/{"+r.TypeName+"-id}").To(r.Put).
 			Doc(resource.PutDoc()).
-			Reads(resource.Reads()).
+			Reads(reflect.Indirect(reflect.ValueOf(resource.Reads())).Interface()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
 			Returns(http.StatusBadRequest, "Invalid put data", ErrorResponse{})
@@ -215,7 +216,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	if resource, ok := resource.(PatchSupported); ok {
 		route := ws.PATCH("/{"+r.TypeName+"-id").To(r.Patch).
 			Doc(resource.PatchDoc()).
-			Reads(resource.Reads()).
+			Reads(reflect.Indirect(reflect.ValueOf(resource.Reads())).Interface()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
 			Returns(http.StatusBadRequest, "Invalid patch data", ErrorResponse{})
