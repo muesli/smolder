@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/emicklei/go-restful"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

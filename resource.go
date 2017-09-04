@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"reflect"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/emicklei/go-restful"
+	log "github.com/sirupsen/logrus"
 )
 
 // APIResource contains all the functions required to register a new API resource
