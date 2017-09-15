@@ -104,7 +104,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	isDatabaseItem := false
 	if resource, ok := resource.(GetIDSupported); ok {
 		isDatabaseItem = true
-		route := ws.GET("/{id}").To(r.GetByIDs).
+		route := ws.GET("/{id:*}").To(r.GetByIDs).
 			Doc("get item by id").
 			Returns(http.StatusOK, "OK", resource.Returns()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{}).
