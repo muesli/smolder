@@ -55,7 +55,7 @@ func loggingFilter(req *restful.Request, resp *restful.Response, chain *restful.
 	if req.Request.Method != optionsReqIdentifier {
 		log.WithFields(log.Fields{
 			"Method": req.Request.Method,
-			"URL":    req.Request.URL,
+			"URL":    req.Request.URL.String(),
 		}).Info("Handling request")
 	}
 
@@ -66,7 +66,7 @@ func loggingFilter(req *restful.Request, resp *restful.Response, chain *restful.
 	if req.Request.Method != optionsReqIdentifier {
 		log.WithFields(log.Fields{
 			"Method":   req.Request.Method,
-			"URL":      req.Request.URL,
+			"URL":      req.Request.URL.String(),
 			"Response": resp.StatusCode(),
 			"Duration": duration,
 		}).Info("Finished request")
