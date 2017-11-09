@@ -96,7 +96,7 @@ func NewSmolderContainer(config APIConfig, _shutdownGracefully *bool, _requestIn
 	wsContainer.Filter(gracefulShutdownFilter)
 	wsContainer.Filter(loggingFilter)
 	wsContainer.Filter(optionsFilter)
-	// wsContainer.Filter(corsFilter)
+	wsContainer.Filter(corsFilter)
 	wsContainer.Filter(wsContainer.OPTIONSFilter)
 
 	return wsContainer
