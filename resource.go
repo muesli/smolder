@@ -274,9 +274,8 @@ func (r Resource) Get(request *restful.Request, response *restful.Response) {
 		if resource.GetAuthRequired() {
 			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
-					false,
 					"Invalid accesstoken",
 					"GET"))
 				return
@@ -285,9 +284,8 @@ func (r Resource) Get(request *restful.Request, response *restful.Response) {
 
 		params, err := Validate(request, resource.GetParams())
 		if err != nil {
-			ErrorResponseHandler(request, response, NewErrorResponse(
+			ErrorResponseHandler(request, response, err, NewErrorResponse(
 				http.StatusBadRequest,
-				false,
 				err,
 				"validate"))
 			return
@@ -313,9 +311,8 @@ func (r Resource) Post(request *restful.Request, response *restful.Response) {
 		if resource.PostAuthRequired() {
 			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
-					false,
 					"Invalid accesstoken",
 					"POST"))
 				return
@@ -326,9 +323,8 @@ func (r Resource) Post(request *restful.Request, response *restful.Response) {
 		if ps != nil {
 			err := request.ReadEntity(&ps)
 			if err != nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusBadRequest,
-					false,
 					"Can't parse request data",
 					"POST Data Validation"))
 				return
@@ -336,9 +332,8 @@ func (r Resource) Post(request *restful.Request, response *restful.Response) {
 
 			err = resource.Validate(context, ps, request)
 			if err != nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusBadRequest,
-					false,
 					err,
 					"POST Data Validation"))
 				return
@@ -357,9 +352,8 @@ func (r Resource) Put(request *restful.Request, response *restful.Response) {
 		if resource.PutAuthRequired() {
 			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
-					false,
 					"Invalid accesstoken",
 					"PUT"))
 				return
@@ -370,9 +364,8 @@ func (r Resource) Put(request *restful.Request, response *restful.Response) {
 		if ps != nil {
 			err := request.ReadEntity(&ps)
 			if err != nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusBadRequest,
-					false,
 					"Can't parse request data",
 					"PUT Data Validation"))
 				return
@@ -380,9 +373,8 @@ func (r Resource) Put(request *restful.Request, response *restful.Response) {
 
 			err = resource.Validate(context, ps, request)
 			if err != nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusBadRequest,
-					false,
 					err,
 					"PUT Data Validation"))
 				return
@@ -401,9 +393,8 @@ func (r Resource) Patch(request *restful.Request, response *restful.Response) {
 		if resource.PatchAuthRequired() {
 			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
-					false,
 					"Invalid accesstoken",
 					"PATCH"))
 				return
@@ -414,9 +405,8 @@ func (r Resource) Patch(request *restful.Request, response *restful.Response) {
 		if ps != nil {
 			err := request.ReadEntity(&ps)
 			if err != nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusBadRequest,
-					false,
 					"Can't parse request data",
 					"PATCH Data Validation"))
 				return
@@ -424,9 +414,8 @@ func (r Resource) Patch(request *restful.Request, response *restful.Response) {
 
 			err = resource.Validate(context, ps, request)
 			if err != nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusBadRequest,
-					false,
 					err,
 					"PATCH Data Validation"))
 				return
@@ -445,9 +434,8 @@ func (r Resource) Delete(request *restful.Request, response *restful.Response) {
 		if resource.DeleteAuthRequired() {
 			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
-					false,
 					"Invalid accesstoken",
 					"DELETE"))
 				return
@@ -466,9 +454,8 @@ func (r Resource) GetByIDs(request *restful.Request, response *restful.Response)
 		if resource.GetByIDsAuthRequired() {
 			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
-				ErrorResponseHandler(request, response, NewErrorResponse(
+				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
-					false,
 					"Invalid accesstoken",
 					"GET"))
 				return
@@ -489,9 +476,8 @@ func (r Resource) GetByIDs(request *restful.Request, response *restful.Response)
 		}
 
 		if len(ids) == 0 {
-			ErrorResponseHandler(request, response, NewErrorResponse(
+			ErrorResponseHandler(request, response, nil, NewErrorResponse(
 				http.StatusBadRequest,
-				false,
 				"No item-id(s) specified",
 				"validate"))
 			return
@@ -504,9 +490,8 @@ func (r Resource) GetByIDs(request *restful.Request, response *restful.Response)
 
 // NotFound is the default 404 response
 func (r Resource) NotFound(request *restful.Request, response *restful.Response) {
-	ErrorResponseHandler(request, response, NewErrorResponse(
+	ErrorResponseHandler(request, response, nil, NewErrorResponse(
 		http.StatusNotFound,
-		false,
 		"This "+r.TypeName+" does not exist.",
 		r.TypeName))
 }

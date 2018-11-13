@@ -8,8 +8,8 @@
 package smolder
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/emicklei/go-restful"
+	log "github.com/sirupsen/logrus"
 )
 
 // APIError describes an API error
@@ -33,7 +33,7 @@ func (err *ErrorResponse) Error() string {
 }
 
 // NewErrorResponse creates a new ErrorResponse with the provided values
-func NewErrorResponse(code int, internal bool, err interface{}, context string) *ErrorResponse {
+func NewErrorResponse(code int, err interface{}, context string) *ErrorResponse {
 	var msg string
 
 	switch err := err.(type) {
@@ -46,10 +46,10 @@ func NewErrorResponse(code int, internal bool, err interface{}, context string) 
 	}
 
 	return &ErrorResponse{
-		[]APIError{
+		Err: []APIError{
 			{
 				Code:          code,
-				InternalError: internal,
+				InternalError: code == 500,
 				Msg:           msg,
 				Context:       context,
 			},
@@ -58,14 +58,13 @@ func NewErrorResponse(code int, internal bool, err interface{}, context string) 
 }
 
 // ErrorResponseHandler is the default error response handler
-func ErrorResponseHandler(request *restful.Request, response *restful.Response, err *ErrorResponse) {
+func ErrorResponseHandler(request *restful.Request, response *restful.Response, origin error, err *ErrorResponse) {
 	fields := log.Fields{
-		"Internal":     err.Err[0].InternalError,
-		"Description":  err.Err[0].Msg,
-		"Context":      err.Err[0].Context,
-		"URL":          request.Request.URL.String(),
-		"Method":       request.Request.Method,
-		"http_request": request.Request,
+		"Internal":    err.Err[0].InternalError,
+		"Description": err.Err[0].Msg,
+		"Context":     err.Err[0].Context,
+		"URL":         request.Request.URL.String(),
+		"Method":      request.Request.Method,
 	}
 
 	for k, vs := range request.Request.Form {
@@ -78,7 +77,7 @@ func ErrorResponseHandler(request *restful.Request, response *restful.Response, 
 		}
 		fields[k] = out
 	}
-	log.WithFields(fields).Error(err)
+	log.WithFields(fields).Error(origin)
 
 	if response != nil {
 		response.WriteHeaderAndEntity(err.Err[0].Code, err)
