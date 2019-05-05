@@ -187,7 +187,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(PutSupported); ok {
-		route := ws.PUT("/{"+r.TypeName+"-id}").To(r.Put).
+		route := ws.PUT("/{"+r.TypeName+"-id:*}").To(r.Put).
 			Doc(resource.PutDoc()).
 			Reads(reflect.Indirect(reflect.ValueOf(resource.Reads())).Interface()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
@@ -214,7 +214,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(PatchSupported); ok {
-		route := ws.PATCH("/{"+r.TypeName+"-id").To(r.Patch).
+		route := ws.PATCH("/{"+r.TypeName+"-id:*}").To(r.Patch).
 			Doc(resource.PatchDoc()).
 			Reads(reflect.Indirect(reflect.ValueOf(resource.Reads())).Interface()).
 			Returns(http.StatusOK, "OK", resource.Returns()).
@@ -241,7 +241,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(DeleteSupported); ok {
-		route := ws.DELETE("/{"+r.TypeName+"-id}").To(r.Delete).
+		route := ws.DELETE("/{"+r.TypeName+"-id:*}").To(r.Delete).
 			Doc(resource.DeleteDoc()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
 
