@@ -241,7 +241,7 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 	}
 
 	if resource, ok := resource.(DeleteSupported); ok {
-		route := ws.DELETE("/{"+r.TypeName+"-id}:*").To(r.Delete).
+		route := ws.DELETE("/{"+r.TypeName+"-id:*}").To(r.Delete).
 			Doc(resource.DeleteDoc()).
 			Returns(http.StatusNotFound, "Not found", ErrorResponse{})
 
