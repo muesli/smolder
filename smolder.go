@@ -74,7 +74,9 @@ func loggingFilter(req *restful.Request, resp *restful.Response, chain *restful.
 }
 
 func corsFilter(request *restful.Request, response *restful.Response, chain *restful.FilterChain) {
-	response.Header().Set("Access-Control-Allow-Origin", "*")
+	if request.Request.Method != optionsReqIdentifier {
+		response.Header().Set("Access-Control-Allow-Origin", "*")
+	}
 	chain.ProcessFilter(request, response)
 }
 
