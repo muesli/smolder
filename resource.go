@@ -271,8 +271,8 @@ func (r Resource) Init(container *restful.Container, resource interface{}) {
 func (r Resource) Get(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(GetSupported); ok {
 		context := r.Context.NewAPIContext()
+		auth, err := context.Authentication(request)
 		if resource.GetAuthRequired() {
-			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
 				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
@@ -281,6 +281,7 @@ func (r Resource) Get(request *restful.Request, response *restful.Response) {
 				return
 			}
 		}
+		context.SetAuth(auth)
 
 		params, err := Validate(request, resource.GetParams())
 		if err != nil {
@@ -308,8 +309,8 @@ func (r Resource) Get(request *restful.Request, response *restful.Response) {
 func (r Resource) Post(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(PostSupported); ok {
 		context := r.Context.NewAPIContext()
+		auth, err := context.Authentication(request)
 		if resource.PostAuthRequired() {
-			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
 				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
@@ -318,6 +319,7 @@ func (r Resource) Post(request *restful.Request, response *restful.Response) {
 				return
 			}
 		}
+		context.SetAuth(auth)
 
 		ps := resource.Reads()
 		if ps != nil {
@@ -349,8 +351,8 @@ func (r Resource) Post(request *restful.Request, response *restful.Response) {
 func (r Resource) Put(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(PutSupported); ok {
 		context := r.Context.NewAPIContext()
+		auth, err := context.Authentication(request)
 		if resource.PutAuthRequired() {
-			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
 				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
@@ -359,6 +361,7 @@ func (r Resource) Put(request *restful.Request, response *restful.Response) {
 				return
 			}
 		}
+		context.SetAuth(auth)
 
 		ps := resource.Reads()
 		if ps != nil {
@@ -390,8 +393,8 @@ func (r Resource) Put(request *restful.Request, response *restful.Response) {
 func (r Resource) Patch(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(PatchSupported); ok {
 		context := r.Context.NewAPIContext()
+		auth, err := context.Authentication(request)
 		if resource.PatchAuthRequired() {
-			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
 				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
@@ -400,6 +403,7 @@ func (r Resource) Patch(request *restful.Request, response *restful.Response) {
 				return
 			}
 		}
+		context.SetAuth(auth)
 
 		ps := resource.Reads()
 		if ps != nil {
@@ -431,8 +435,8 @@ func (r Resource) Patch(request *restful.Request, response *restful.Response) {
 func (r Resource) Delete(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(DeleteSupported); ok {
 		context := r.Context.NewAPIContext()
+		auth, err := context.Authentication(request)
 		if resource.DeleteAuthRequired() {
-			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
 				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
@@ -441,6 +445,7 @@ func (r Resource) Delete(request *restful.Request, response *restful.Response) {
 				return
 			}
 		}
+		context.SetAuth(auth)
 
 		resource.Delete(context, request, response)
 		request.SetAttribute("context", context)
@@ -451,8 +456,8 @@ func (r Resource) Delete(request *restful.Request, response *restful.Response) {
 func (r Resource) GetByIDs(request *restful.Request, response *restful.Response) {
 	if resource, ok := r.Parent.(GetIDSupported); ok {
 		context := r.Context.NewAPIContext()
+		auth, err := context.Authentication(request)
 		if resource.GetByIDsAuthRequired() {
-			auth, err := context.Authentication(request)
 			if err != nil || auth == nil {
 				ErrorResponseHandler(request, response, err, NewErrorResponse(
 					http.StatusUnauthorized,
@@ -461,6 +466,7 @@ func (r Resource) GetByIDs(request *restful.Request, response *restful.Response)
 				return
 			}
 		}
+		context.SetAuth(auth)
 
 		ids := []string{}
 		if ql, ok := request.Request.URL.Query()["ids[]"]; ok {

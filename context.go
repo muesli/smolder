@@ -17,4 +17,5 @@ type APIContextFactory interface {
 // APIContext contains all the functions required to interact with the API user
 type APIContext interface {
 	Authentication(request *restful.Request) (interface{}, error)
+	SetAuth(auth interface{})
 }

@@ -16,6 +16,9 @@ func (context *Context) NewAPIContext() smolder.APIContext {
 	return &Context{}
 }
 
+func (context *Context) SetAuth(auth interface{}) {
+}
+
 // LogSummary logs out the current context stats
 func (context *Context) LogSummary() {
 }
