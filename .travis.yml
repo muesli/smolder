@@ -17,6 +17,10 @@ go:
   - 1.12.x
   - tip
 
+env:
+  global:
+    GO111MODULE=on
+
 notifications:
   email:
     on_success: change
